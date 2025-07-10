@@ -13,7 +13,7 @@
 
 a, b, v = map(int, input().split())
 
-# (day - b) * (a - b) = v
+# day * (a - b) = v - b
 day = (v - b) / (a - b)
 # 위 결과가 정수라면 그대로, 소수라면 올림 처리 해야함
 

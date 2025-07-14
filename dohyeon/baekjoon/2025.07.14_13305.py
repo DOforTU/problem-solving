@@ -36,8 +36,8 @@ distances = list(map(int, input().strip().split()))
 prices = list(map(int, input().strip().split())) 
 
 # 초기 가격은 첫 번째 도시의 주유소 가격과 첫 번째 도로 길이의 곱
-min_price = prices[0] * distances[0]
-result = min_price
+min_price = prices[0]
+result = min_price * distances[0]
 
 for i in range(1, n - 1):
     # 현재 도시의 주유소 가격이 최소 가격보다 낮으면 갱신

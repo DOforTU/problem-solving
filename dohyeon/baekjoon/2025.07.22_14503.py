@@ -34,67 +34,52 @@ rooms = [list(map(int, input().split())) for _ in range(n)]
 #     print(rooms[i])
 
 # 필요한 함수들 정의
-# 1. 주변 4칸 탐색
-def get_surrounding_positions(r, c):
-    return [(r-1, c), (r, c+1), (r+1, c), (r, c-1)]
 
-# 2. 방향 회전(반시계 방향이므로 왼쪽 회전만 필요)
+# 방향 회전(반시계 방향이므로 왼쪽 회전만 필요)
+# 방향: 북, 동, 남, 서
+dr = [-1, 0, 1, 0] # 행(row) 방향으로의 변화량
+dc = [0, 1, 0, -1] # 열(column) 방향으로의 변화량
+
 def turn_left(d):
-    return (d - 1) % 4
+    return (d + 3) % 4  # 반시계 방향 회전
 
-# 3. 청소 상태 확인 및 청소
-def clean(r, c):
-    if rooms[r][c] == 0:  # 청소되지 않은 빈 칸
-        rooms[r][c] = 2  # 청소 완료 상태로 변경
-        return True
-    return False
-
-# 4. 후진: 후진 가능한지 true/false 반환
-def can_move_back(r, c, d):
-    if d == 0:  # 북쪽
-        return r + 1 < n and rooms[r + 1][c] != 1
-    elif d == 1:  # 동쪽
-        return c - 1 >= 0 and rooms[r][c - 1] != 1
-    elif d == 2:  # 남쪽
-        return r - 1 >= 0 and rooms[r - 1][c] != 1
-    elif d == 3:  # 서쪽
-        return c + 1 < m and rooms[r][c + 1] != 1
-    
-# 5. 최종 코드
+# 로봇 청소기 작동 함수
 def robot_vacuum(r, c, d):
-    cleaned_count = 0
+    cleaned_count = 0  # 청소한 칸의 수를 저장
 
     while True:
-        # 현재 위치 청소
-        if clean(r, c):
+        # 1. 현재 칸이 아직 청소되지 않은 경우, 청소 수행
+        if rooms[r][c] == 0:
+            rooms[r][c] = 2  # 청소 완료 표시 (2)
             cleaned_count += 1
-        
-        # 주변 4칸 탐색
-        surrounding_positions = get_surrounding_positions(r, c)
-        found_cleanable = False
-        
-        for i in range(4):
-            new_d = turn_left(d)  # 반시계 방향으로 회전
-            new_r, new_c = surrounding_positions[i]
-            
-            if 0 <= new_r < n and 0 <= new_c < m and rooms[new_r][new_c] == 0:
-                r, c, d = new_r, new_c, new_d  # 이동
-                found_cleanable = True
-                break
-        
-        if not found_cleanable:  # 청소할 수 있는 칸이 없을 때
-            if can_move_back(r, c, d):  # 후진 가능 여부 확인
-                if d == 0:  # 북쪽
-                    r += 1
-                elif d == 1:  # 동쪽
-                    c -= 1
-                elif d == 2:  # 남쪽
-                    r -= 1
-                elif d == 3:  # 서쪽
-                    c += 1
-            else:
-                break  # 후진 불가능하면 종료
 
-    return cleaned_count
+        cleaned = False  # 주변 청소 여부 확인용 플래그
+
+        # 2. 주변 4칸 중 청소되지 않은 빈 칸이 있는지 탐색
+        for _ in range(4):
+            d = turn_left(d)  # 반시계 방향으로 회전
+            nr = r + dr[d]    # 회전한 방향의 앞쪽 좌표
+            nc = c + dc[d]
+
+            # 그 칸이 청소되지 않은 빈 칸이라면
+            if 0 <= nr < n and 0 <= nc < m and rooms[nr][nc] == 0:
+                r, c = nr, nc  # 그 방향으로 한 칸 전진
+                cleaned = True
+                break  # 청소할 곳을 찾았으므로 더 이상 탐색하지 않음
+
+        # 3. 네 방향 모두 청소할 곳이 없을 경우
+        if not cleaned:
+            back_dir = (d + 2) % 4  # 현재 방향 기준 뒤쪽 방향 계산
+            br = r + dr[back_dir]   # 후진할 위치 계산
+            bc = c + dc[back_dir]
+
+            # 후진할 수 있다면
+            if 0 <= br < n and 0 <= bc < m and rooms[br][bc] != 1:
+                r, c = br, bc  # 후진하고 다시 반복
+            else:
+                break  # 뒤가 벽이면 작동 종료
+
+    return cleaned_count  # 청소한 칸 수 반환
+
 
 print(robot_vacuum(r, c, d))

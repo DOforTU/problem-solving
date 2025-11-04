@@ -81,7 +81,6 @@ class Solution:
                 serialized_list.pop()
                 
             serialized_results.append(serialized_list)
-            # ------------------------------------
             
         return serialized_results
 
